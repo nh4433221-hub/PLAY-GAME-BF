@@ -1,0 +1,1730 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Ludo Classic - লুডু ক্লাসিক</title>
+<style>
+  :root {
+    --bg-dark: #0f172a;
+    --card-bg: #1e293b;
+    --text-light: #f8fafc;
+    --text-muted: #94a3b8;
+    --red: #e11d48;
+    --red-light: #ffe4e6;
+    --red-dark: #9f1239;
+    --green: #059669;
+    --green-light: #d1fae5;
+    --green-dark: #065f46;
+    --yellow: #d97706;
+    --yellow-light: #fef3c7;
+    --yellow-dark: #92400e;
+    --blue: #2563eb;
+    --blue-light: #dbeafe;
+    --blue-dark: #1e40af;
+    --gold: #fbbf24;
+    --board-bg: #faf8f5;
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Hind Siliguri", sans-serif;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  body {
+    background: radial-gradient(circle at top, #1e1b4b 0%, #0f172a 100%);
+    color: var(--text-light);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 12px;
+    overflow-x: hidden;
+  }
+
+  .app-container {
+    width: 100%;
+    max-width: 500px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+  }
+
+  /* Header */
+  header {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    background: rgba(30, 41, 59, 0.7);
+    backdrop-filter: blur(8px);
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .title-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .title-group h1 {
+    font-size: 1.15rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #fbbf24, #f59e0b);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .header-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .btn-icon {
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    color: var(--text-light);
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-icon:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: scale(1.05);
+  }
+
+  .pill-lang {
+    background: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #fff;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  /* Screens */
+  .screen {
+    width: 100%;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    animation: fadeIn 0.3s ease;
+  }
+
+  .screen.active {
+    display: flex;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Menu Screen */
+  .hero-card {
+    background: linear-gradient(145deg, #1e293b, #0f172a);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 24px;
+    padding: 24px;
+    text-align: center;
+    width: 100%;
+    box-shadow: 0 12px 30px rgba(0,0,0,0.4);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .dice-hero-icon {
+    width: 80px;
+    height: 80px;
+    background: #fff;
+    border-radius: 20px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    padding: 12px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.5), inset 0 2px 4px rgba(255,255,255,0.8);
+    transform: rotate(-10deg);
+  }
+
+  .hero-pip {
+    background: #e11d48;
+    border-radius: 50%;
+    box-shadow: inset 0 1px 2px rgba(0,0,0,0.4);
+  }
+
+  .menu-btn {
+    width: 100%;
+    padding: 16px;
+    font-size: 1.05rem;
+    font-weight: 700;
+    border: none;
+    border-radius: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.3);
+    transition: transform 0.15s, filter 0.15s;
+    color: #fff;
+  }
+
+  .menu-btn:hover {
+    filter: brightness(1.1);
+    transform: translateY(-2px);
+  }
+
+  .btn-bot { background: linear-gradient(135deg, var(--blue), var(--blue-dark)); }
+  .btn-pass { background: linear-gradient(135deg, var(--green), var(--green-dark)); }
+
+  /* Setup Screen */
+  .setup-card {
+    background: var(--card-bg);
+    border-radius: 20px;
+    padding: 18px;
+    width: 100%;
+    border: 1px solid rgba(255,255,255,0.1);
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .setup-section-title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--gold);
+  }
+
+  .chip-group {
+    display: flex;
+    gap: 8px;
+  }
+
+  .chip {
+    flex: 1;
+    text-align: center;
+    padding: 10px;
+    border-radius: 12px;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 600;
+    transition: all 0.2s;
+  }
+
+  .chip.selected {
+    background: var(--gold);
+    color: #000;
+    border-color: var(--gold);
+    font-weight: 800;
+  }
+
+  .player-inputs {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .player-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .player-color-dot {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .player-row input {
+    flex: 1;
+    padding: 10px 14px;
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.15);
+    background: rgba(0,0,0,0.3);
+    color: #fff;
+    font-size: 0.9rem;
+    outline: none;
+  }
+
+  .player-row input:focus {
+    border-color: var(--gold);
+  }
+
+  /* Game Screen */
+  .players-bar {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+  }
+
+  .player-badge {
+    background: rgba(30, 41, 59, 0.8);
+    border: 2px solid transparent;
+    border-radius: 12px;
+    padding: 6px 4px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    transition: all 0.25s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .player-badge.active-turn {
+    background: rgba(255, 255, 255, 0.08);
+    box-shadow: 0 0 16px rgba(251, 191, 36, 0.3);
+    transform: scale(1.03);
+  }
+
+  .player-badge .name {
+    font-size: 0.72rem;
+    font-weight: 700;
+    max-width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .player-badge .score {
+    font-size: 0.68rem;
+    color: var(--text-muted);
+  }
+
+  /* Status message banner */
+  .status-banner {
+    width: 100%;
+    text-align: center;
+    font-size: 0.9rem;
+    font-weight: 700;
+    padding: 8px 14px;
+    border-radius: 20px;
+    background: rgba(251, 191, 36, 0.15);
+    color: var(--gold);
+    border: 1px solid rgba(251, 191, 36, 0.3);
+    min-height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Board View */
+  .board-container {
+    width: 100%;
+    aspect-ratio: 1;
+    position: relative;
+    background: var(--board-bg);
+    border-radius: 20px;
+    box-shadow: 0 16px 40px rgba(0,0,0,0.5);
+    border: 4px solid #334155;
+    touch-action: manipulation;
+  }
+
+  #ludoCanvas {
+    width: 100%;
+    height: 100%;
+    border-radius: 16px;
+    display: block;
+    cursor: pointer;
+  }
+
+  /* Bottom Controls: Animated 3D Dice and Action */
+  .dice-controls {
+    width: 100%;
+    background: rgba(30, 41, 59, 0.95);
+    border-radius: 20px;
+    padding: 12px 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+  }
+
+  .turn-guide {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  .turn-player-name {
+    font-size: 1.05rem;
+    font-weight: 800;
+  }
+
+  .turn-subtext {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    font-weight: 600;
+  }
+
+  .dice-box {
+    width: 66px;
+    height: 66px;
+    background: linear-gradient(145deg, #ffffff, #f1f5f9);
+    border-radius: 16px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    padding: 10px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.4), inset 0 2px 4px #ffffff, 0 0 0 2px #cbd5e1;
+    cursor: pointer;
+    transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    position: relative;
+  }
+
+  .dice-box.can-roll {
+    animation: dicePulse 1.2s infinite ease-in-out;
+  }
+
+  @keyframes dicePulse {
+    0%, 100% { transform: scale(1); box-shadow: 0 8px 20px rgba(0,0,0,0.4), 0 0 0 3px var(--gold); }
+    50% { transform: scale(1.08); box-shadow: 0 12px 28px rgba(0,0,0,0.6), 0 0 0 5px var(--gold); }
+  }
+
+  .dice-box.rolling {
+    animation: diceRollAnim 0.35s infinite linear;
+  }
+
+  @keyframes diceRollAnim {
+    0% { transform: rotate(0deg) scale(0.95); }
+    25% { transform: rotate(90deg) scale(1.05); }
+    50% { transform: rotate(180deg) scale(0.95); }
+    75% { transform: rotate(270deg) scale(1.05); }
+    100% { transform: rotate(360deg) scale(0.95); }
+  }
+
+  .pip {
+    background: #1e293b;
+    border-radius: 50%;
+    margin: 2px;
+    box-shadow: inset 0 1px 2px rgba(0,0,0,0.5);
+  }
+
+  /* Modal */
+  .modal-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.75);
+    backdrop-filter: blur(6px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    z-index: 100;
+  }
+
+  .modal-overlay.active {
+    display: flex;
+  }
+
+  .modal-card {
+    background: var(--card-bg);
+    border-radius: 24px;
+    border: 1px solid rgba(255,255,255,0.15);
+    width: 100%;
+    max-width: 420px;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+    max-height: 85vh;
+    overflow-y: auto;
+  }
+
+  .modal-title {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: var(--gold);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .rule-item {
+    display: flex;
+    gap: 10px;
+    font-size: 0.9rem;
+    line-height: 1.4;
+    color: #e2e8f0;
+  }
+
+  .rule-icon {
+    color: var(--gold);
+    font-size: 1.2rem;
+    flex-shrink: 0;
+  }
+
+  .btn-close {
+    background: var(--gold);
+    color: #000;
+    font-weight: 800;
+    padding: 12px;
+    border-radius: 14px;
+    border: none;
+    cursor: pointer;
+    width: 100%;
+    font-size: 1rem;
+  }
+
+  /* Confetti canvas */
+  #confettiCanvas {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    border-radius: 24px;
+  }
+</style>
+</head>
+<body>
+
+<div class="app-container">
+  <!-- Header Bar -->
+  <header>
+    <div class="title-group">
+      <span style="font-size: 1.3rem;">🎲</span>
+      <h1 id="appTitle">Ludo Classic</h1>
+    </div>
+    <div class="header-actions">
+      <button class="pill-lang" id="btnLang" title="Toggle Language">বাংলা 🇧🇩</button>
+      <button class="btn-icon" id="btnSound" title="Toggle Sound">🔊</button>
+      <button class="btn-icon" id="btnRules" title="Rules">ℹ️</button>
+    </div>
+  </header>
+
+  <!-- SCREEN 1: Menu Screen -->
+  <div class="screen active" id="menuScreen">
+    <div class="hero-card">
+      <div class="dice-hero-icon">
+        <div class="hero-pip" style="grid-column: 1; grid-row: 1;"></div>
+        <div class="hero-pip" style="grid-column: 3; grid-row: 1;"></div>
+        <div class="hero-pip" style="grid-column: 2; grid-row: 2;"></div>
+        <div class="hero-pip" style="grid-column: 1; grid-row: 3;"></div>
+        <div class="hero-pip" style="grid-column: 3; grid-row: 3;"></div>
+      </div>
+      <h2 id="menuHeading" style="font-size: 1.5rem; font-weight: 800;">লুডু ক্লাসিক</h2>
+      <p id="menuSubheading" style="color: var(--text-muted); font-size: 0.95rem;">চিরন্তন খাঁটি লুডু খেলার সেরা অভিজ্ঞতা</p>
+    </div>
+
+    <button class="menu-btn btn-bot" id="btnStartVsBot">
+      <span style="font-size: 1.4rem;">🤖</span>
+      <span id="txtVsBot">কম্পিউটারের সাথে খেলুন (Vs Bot)</span>
+    </button>
+
+    <button class="menu-btn btn-pass" id="btnStartPassPlay">
+      <span style="font-size: 1.4rem;">👥</span>
+      <span id="txtPassPlay">বন্ধুদের সাথে খেলুন (Pass & Play)</span>
+    </button>
+  </div>
+
+  <!-- SCREEN 2: Setup Screen -->
+  <div class="screen" id="setupScreen">
+    <div class="setup-card">
+      <div class="setup-section-title" id="lblPlayerCount">খেলোয়াড়ের সংখ্যা</div>
+      <div class="chip-group">
+        <div class="chip" data-count="2" id="chip2P">২ জন</div>
+        <div class="chip" data-count="3" id="chip3P">৩ জন</div>
+        <div class="chip selected" data-count="4" id="chip4P">৪ জন</div>
+      </div>
+
+      <div class="setup-section-title" id="lblGameMode">খেলার ধরণ</div>
+      <div class="chip-group">
+        <div class="chip selected" data-target="4" id="chipClassic">ক্লাসিক (৪টি ঘুঁটি)</div>
+        <div class="chip" data-target="2" id="chipQuick">দ্রুত (২টি ঘুঁটি)</div>
+      </div>
+
+      <div class="setup-section-title" id="lblPlayerNames">খেলোয়াড়দের নাম</div>
+      <div class="player-inputs">
+        <div class="player-row" id="rowP1">
+          <div class="player-color-dot" style="background: var(--red);"></div>
+          <input type="text" id="nameP1" value="খেলোয়াড় ১">
+        </div>
+        <div class="player-row" id="rowP2">
+          <div class="player-color-dot" style="background: var(--green);"></div>
+          <input type="text" id="nameP2" value="খেলোয়াড় ২">
+        </div>
+        <div class="player-row" id="rowP3">
+          <div class="player-color-dot" style="background: var(--yellow);"></div>
+          <input type="text" id="nameP3" value="খেলোয়াড় ৩">
+        </div>
+        <div class="player-row" id="rowP4">
+          <div class="player-color-dot" style="background: var(--blue);"></div>
+          <input type="text" id="nameP4" value="খেলোয়াড় ৪">
+        </div>
+      </div>
+    </div>
+
+    <div style="display: flex; gap: 10px; width: 100%;">
+      <button class="menu-btn" id="btnSetupBack" style="background: #334155; flex: 1;">⬅️</button>
+      <button class="menu-btn" id="btnLaunchGame" style="background: var(--gold); color: #000; flex: 3; font-weight: 800;">
+        <span id="txtStartGame">খেলা শুরু করুন 🚀</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- SCREEN 3: Game Screen -->
+  <div class="screen" id="gameScreen">
+    <!-- Players status top bar -->
+    <div class="players-bar" id="playersBar"></div>
+
+    <!-- Status message banner -->
+    <div class="status-banner" id="statusBanner">লুডু খেলা শুরু হয়েছে!</div>
+
+    <!-- 15x15 Ludo Board -->
+    <div class="board-container">
+      <canvas id="ludoCanvas" width="600" height="600"></canvas>
+    </div>
+
+    <!-- Bottom Dice and Action Bar -->
+    <div class="dice-controls">
+      <div class="turn-guide">
+        <div class="turn-player-name" id="turnPlayerName">লাল এর চাল</div>
+        <div class="turn-subtext" id="turnSubtext">চাল দিতে ডাইসে চাপুন</div>
+      </div>
+
+      <!-- 3D Pip Dice Box -->
+      <div class="dice-box can-roll" id="diceBox" title="Roll Dice">
+        <!-- pips generated dynamically -->
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Rules Modal -->
+<div class="modal-overlay" id="rulesModal">
+  <div class="modal-card">
+    <div class="modal-title">
+      <span id="rulesTitle">খেলার নিয়মাবলী (Rules)</span>
+      <span style="cursor: pointer;" id="closeRulesIcon">✕</span>
+    </div>
+    <div class="rule-item">
+      <span class="rule-icon">🎲</span>
+      <span id="rule1">ঘাঁটি থেকে ঘুঁটি বের করতে হলে ৬ (ছক্কা) পড়তে হবে। ৬ পড়লে অতিরিক্ত চাল পাওয়া যায়।</span>
+    </div>
+    <div class="rule-item">
+      <span class="rule-icon">⭐</span>
+      <span id="rule2">তারকাচিহ্নিত এবং শুরুর রঙিন ঘরগুলো নিরাপদ। এই ঘরগুলোতে ঘুঁটি কাটা যায় না।</span>
+    </div>
+    <div class="rule-item">
+      <span class="rule-icon">⚔️</span>
+      <span id="rule3">অনিরাপদ ঘরে প্রতিপক্ষের ঘুঁটিতে পড়লে সেটি কেটে ঘাঁটিতে ফিরে যাবে এবং আপনি একটি বোনাস চাল পাবেন।</span>
+    </div>
+    <div class="rule-item">
+      <span class="rule-icon">🏠</span>
+      <span id="rule4">ঘুঁটি কেন্দ্রে (পাকা ঘরে) পৌঁছে দিলে অতিরিক্ত একটি চাল পাওয়া যায়।</span>
+    </div>
+    <div class="rule-item">
+      <span class="rule-icon">⚠️</span>
+      <span id="rule5">টানা ৩ বার ৬ পড়লে শেষ চালটি বাতিল হয়ে পরবর্তী খেলোয়াড়ের পালা আসবে।</span>
+    </div>
+    <button class="btn-close" id="btnCloseRules">বুঝেছি (Got It)</button>
+  </div>
+</div>
+
+<!-- Winner Celebration Modal -->
+<div class="modal-overlay" id="winnerModal">
+  <div class="modal-card" style="text-align: center; position: relative;">
+    <canvas id="confettiCanvas" width="400" height="450"></canvas>
+    <div style="font-size: 3rem; margin-top: 10px;">🏆</div>
+    <h2 id="winnerTitle" style="font-size: 1.5rem; font-weight: 800; color: var(--gold);">অভিনন্দন!</h2>
+    <p id="winnerDesc" style="font-size: 1.1rem; font-weight: 700; color: #fff;">খেলোয়াড় ১ জয়ী হয়েছেন!</p>
+    <div style="display: flex; gap: 10px; margin-top: 10px;">
+      <button class="btn-close" id="btnPlayAgain" style="flex: 1;">আবার খেলুন</button>
+      <button class="btn-close" id="btnWinMainMenu" style="flex: 1; background: #334155; color: #fff;">মেনু</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ==========================================================================
+   LUDO CLASSIC - FULL JAVASCRIPT GAME ENGINE
+   ========================================================================== */
+
+// --- Audio Manager (Web Audio API - 100% self-contained) ---
+class SoundManager {
+  constructor() {
+    this.enabled = true;
+    this.ctx = null;
+  }
+  init() {
+    if (!this.ctx) {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (AudioCtx) this.ctx = new AudioCtx();
+    }
+    if (this.ctx && this.ctx.state === 'suspended') {
+      this.ctx.resume();
+    }
+  }
+  playTone(freq, duration, type = 'sine', gainVal = 0.15) {
+    if (!this.enabled) return;
+    this.init();
+    if (!this.ctx) return;
+    try {
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = type;
+      osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+      gain.gain.setValueAtTime(gainVal, this.ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + duration);
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.start();
+      osc.stop(this.ctx.currentTime + duration);
+    } catch(e) {}
+  }
+  playRoll() {
+    this.playTone(320, 0.06, 'triangle', 0.2);
+  }
+  playStep() {
+    this.playTone(540, 0.08, 'sine', 0.2);
+  }
+  playCapture() {
+    this.playTone(750, 0.15, 'square', 0.25);
+    setTimeout(() => this.playTone(900, 0.2, 'triangle', 0.25), 100);
+  }
+  playHome() {
+    this.playTone(600, 0.12, 'sine', 0.2);
+    setTimeout(() => this.playTone(800, 0.18, 'sine', 0.2), 120);
+    setTimeout(() => this.playTone(1000, 0.25, 'sine', 0.25), 240);
+  }
+  playVictory() {
+    [523, 659, 783, 1046].forEach((f, i) => {
+      setTimeout(() => this.playTone(f, 0.3, 'triangle', 0.3), i * 160);
+    });
+  }
+}
+
+const sounds = new SoundManager();
+
+// --- Localization Strings (Bangla & English) ---
+const STRINGS = {
+  bn: {
+    appTitle: "লুডু ক্লাসিক",
+    menuHeading: "লুডু ক্লাসিক",
+    menuSubheading: "চিরন্তন খাঁটি লুডু খেলার সেরা অভিজ্ঞতা",
+    vsBot: "কম্পিউটারের সাথে খেলুন (Vs Bot)",
+    passPlay: "বন্ধুদের সাথে খেলুন (Pass & Play)",
+    playerCount: "খেলোয়াড়ের সংখ্যা",
+    gameMode: "খেলার ধরণ",
+    playerNames: "খেলোয়াড়দের নাম",
+    twoP: "২ জন", threeP: "৩ জন", fourP: "৪ জন",
+    classic: "ক্লাসিক (৪টি ঘুঁটি)", quick: "দ্রুত (২টি ঘুঁটি)",
+    startGame: "খেলা শুরু করুন 🚀",
+    rollPrompt: "চাল দিতে ডাইসে চাপুন",
+    rolling: "চাল হচ্ছে...",
+    rolledSix: "ছক্কা! আরেকবার চালুন!",
+    bonusCapture: "ঘুঁটি কাটা পড়েছে! বোনাস চাল!",
+    bonusHome: "ঘুঁটি পাকা হয়েছে! বোনাস চাল!",
+    tapToken: "চালতে ঘুঁটিতে ট্যাপ করুন",
+    noMoves: "কোনো চাল নেই",
+    threeSixes: "টানা ৩ ছক্কায় চাল বাতিল!",
+    turn: "এর চাল",
+    thinking: "চাল দিচ্ছে...",
+    winnerCongrat: "অভিনন্দন!",
+    winnerDesc: "{name} জয়ী হয়েছেন!",
+    playAgain: "আবার খেলুন",
+    menu: "মেনু",
+    rulesTitle: "খেলার নিয়মাবলী (Rules)",
+    rule1: "ঘাঁটি থেকে ঘুঁটি বের করতে হলে ৬ (ছক্কা) পড়তে হবে। ৬ পড়লে অতিরিক্ত চাল পাওয়া যায়।",
+    rule2: "তারকাচিহ্নিত এবং শুরুর রঙিন ঘরগুলো নিরাপদ। এই ঘরগুলোতে ঘুঁটি কাটা যায় না।",
+    rule3: "অনিরাপদ ঘরে প্রতিপক্ষের ঘুঁটিতে পড়লে সেটি কেটে ঘাঁটিতে ফিরে যাবে এবং আপনি একটি বোনাস চাল পাবেন।",
+    rule4: "ঘুঁটি কেন্দ্রে (পাকা ঘরে) পৌঁছে দিলে অতিরিক্ত একটি চাল পাওয়া যায়।",
+    rule5: "টানা ৩ বার ৬ পড়লে শেষ চালটি বাতিল হয়ে পরবর্তী খেলোয়াড়ের পালা আসবে।",
+    gotIt: "বুঝেছি (Got It)"
+  },
+  en: {
+    appTitle: "Ludo Classic",
+    menuHeading: "Ludo Classic",
+    menuSubheading: "The Ultimate Classic Board Game Experience",
+    vsBot: "Play vs Computer (Vs Bot)",
+    passPlay: "Play with Friends (Pass & Play)",
+    playerCount: "Number of Players",
+    gameMode: "Game Mode",
+    playerNames: "Player Names",
+    twoP: "2 Players", threeP: "3 Players", fourP: "4 Players",
+    classic: "Classic (4 Tokens)", quick: "Quick (2 Tokens)",
+    startGame: "Start Game 🚀",
+    rollPrompt: "Tap the dice to roll",
+    rolling: "Rolling...",
+    rolledSix: "Six! Roll again!",
+    bonusCapture: "Captured! Bonus Roll!",
+    bonusHome: "Token Homed! Bonus Roll!",
+    tapToken: "Tap a highlighted token to move",
+    noMoves: "No legal moves available",
+    threeSixes: "3 Sixes in a row! Turn skipped!",
+    turn: "'s Turn",
+    thinking: "is thinking...",
+    winnerCongrat: "Victory!",
+    winnerDesc: "{name} has won the match!",
+    playAgain: "Play Again",
+    menu: "Main Menu",
+    rulesTitle: "Game Rules",
+    rule1: "Roll a 6 to bring a token out of the yard. Rolling a 6 awards an extra roll.",
+    rule2: "Star-marked and colored entry squares are safe zones where tokens cannot be captured.",
+    rule3: "Landing on an opponent's token in an unsafe spot knocks it back to base and awards you a bonus roll.",
+    rule4: "Reaching the home center awards an extra turn.",
+    rule5: "Rolling 3 consecutive sixes cancels the turn and passes to the next player.",
+    gotIt: "Got It"
+  }
+};
+
+let currentLang = 'bn';
+
+// --- Ludo Board Coordinates & Map ---
+const COLORS = {
+  red:    { name: "লাল", enName: "Red", primary: "#e11d48", light: "#ffe4e6", dark: "#9f1239", startTrack: 0 },
+  green:  { name: "সবুজ", enName: "Green", primary: "#059669", light: "#d1fae5", dark: "#065f46", startTrack: 13 },
+  yellow: { name: "হলুদ", enName: "Yellow", primary: "#d97706", light: "#fef3c7", dark: "#92400e", startTrack: 26 },
+  blue:   { name: "নীল", enName: "Blue", primary: "#2563eb", light: "#dbeafe", dark: "#1e40af", startTrack: 39 }
+};
+
+// 52 Perimeter Track cells: [r, c] (0..14)
+const TRACK_COORDS = [
+  // Red side
+  [6, 1], [6, 2], [6, 3], [6, 4], [6, 5],
+  // Top arm
+  [5, 6], [4, 6], [3, 6], [2, 6], [1, 6], [0, 6],
+  [0, 7], [0, 8],
+  // Green side
+  [1, 8], [2, 8], [3, 8], [4, 8], [5, 8],
+  // Right arm
+  [6, 9], [6, 10], [6, 11], [6, 12], [6, 13], [6, 14],
+  [7, 14], [8, 14],
+  // Yellow side
+  [8, 13], [8, 12], [8, 11], [8, 10], [8, 9],
+  // Bottom arm
+  [9, 8], [10, 8], [11, 8], [12, 8], [13, 8], [14, 8],
+  [14, 7], [14, 6],
+  // Blue side
+  [13, 6], [12, 6], [11, 6], [10, 6], [9, 6],
+  // Left arm
+  [8, 5], [8, 4], [8, 3], [8, 2], [8, 1], [8, 0],
+  [7, 0], [6, 0]
+];
+
+// Safe track indices
+const SAFE_INDICES = new Set([0, 8, 13, 21, 26, 34, 39, 47]);
+
+// Home stretches for each color (5 cells leading to center)
+const HOME_STRETCHES = {
+  red:    [[7, 1], [7, 2], [7, 3], [7, 4], [7, 5]],
+  green:  [[1, 7], [2, 7], [3, 7], [4, 7], [5, 7]],
+  yellow: [[7, 13], [7, 12], [7, 11], [7, 10], [7, 9]],
+  blue:   [[13, 7], [12, 7], [11, 7], [10, 7], [9, 7]]
+};
+
+// Yard Slots [r, c] for 4 tokens
+const YARD_SLOTS = {
+  red:    [[2, 2], [2, 3], [3, 2], [3, 3]],
+  green:  [[2, 11], [2, 12], [3, 11], [3, 12]],
+  yellow: [[11, 11], [11, 12], [12, 11], [12, 12]],
+  blue:   [[11, 2], [11, 3], [12, 2], [12, 3]]
+};
+
+// Center home coords
+const CENTER_HOME = {
+  red: [7, 6], green: [6, 7], yellow: [7, 8], blue: [8, 7]
+};
+
+// --- Game State ---
+const state = {
+  mode: 'VS_BOT', // 'VS_BOT' or 'PASS_PLAY'
+  playerCount: 4,
+  targetPawns: 4,
+  players: [],
+  turnIndex: 0,
+  diceValue: 1,
+  isRolling: false,
+  hasRolled: false,
+  consecutiveSixes: 0,
+  movablePawnIds: new Set(),
+  isGameOver: false,
+  animPulse: 0
+};
+
+// --- Initialization & UI Wiring ---
+window.addEventListener('DOMContentLoaded', () => {
+  setupUIHandlers();
+  updateText();
+  renderDice(1);
+  startPulseLoop();
+});
+
+function setupUIHandlers() {
+  // Lang Toggle
+  document.getElementById('btnLang').addEventListener('click', () => {
+    currentLang = currentLang === 'bn' ? 'en' : 'bn';
+    document.getElementById('btnLang').innerText = currentLang === 'bn' ? 'বাংলা 🇧🇩' : 'English 🌐';
+    updateText();
+    updateStatus();
+    renderPlayersBar();
+  });
+
+  // Sound Toggle
+  document.getElementById('btnSound').addEventListener('click', () => {
+    sounds.enabled = !sounds.enabled;
+    document.getElementById('btnSound').innerText = sounds.enabled ? '🔊' : '🔇';
+  });
+
+  // Rules Modal
+  const rulesModal = document.getElementById('rulesModal');
+  document.getElementById('btnRules').addEventListener('click', () => rulesModal.classList.add('active'));
+  document.getElementById('closeRulesIcon').addEventListener('click', () => rulesModal.classList.remove('active'));
+  document.getElementById('btnCloseRules').addEventListener('click', () => rulesModal.classList.remove('active'));
+
+  // Winner Modal
+  document.getElementById('btnPlayAgain').addEventListener('click', () => {
+    document.getElementById('winnerModal').classList.remove('active');
+    startNewGame();
+  });
+  document.getElementById('btnWinMainMenu').addEventListener('click', () => {
+    document.getElementById('winnerModal').classList.remove('active');
+    showScreen('menuScreen');
+  });
+
+  // Menu Screen Buttons
+  document.getElementById('btnStartVsBot').addEventListener('click', () => {
+    state.mode = 'VS_BOT';
+    showScreen('setupScreen');
+  });
+  document.getElementById('btnStartPassPlay').addEventListener('click', () => {
+    state.mode = 'PASS_PLAY';
+    showScreen('setupScreen');
+  });
+
+  // Setup Screen Chips
+  ['chip2P', 'chip3P', 'chip4P'].forEach(id => {
+    document.getElementById(id).addEventListener('click', (e) => {
+      document.querySelectorAll('#setupScreen .chip-group:first-of-type .chip').forEach(c => c.classList.remove('selected'));
+      e.target.classList.add('selected');
+      state.playerCount = parseInt(e.target.dataset.count);
+      updateSetupPlayerRows();
+    });
+  });
+
+  ['chipClassic', 'chipQuick'].forEach(id => {
+    document.getElementById(id).addEventListener('click', (e) => {
+      document.querySelectorAll('#setupScreen .chip-group:nth-of-type(2) .chip').forEach(c => c.classList.remove('selected'));
+      e.target.classList.add('selected');
+      state.targetPawns = parseInt(e.target.dataset.target);
+    });
+  });
+
+  document.getElementById('btnSetupBack').addEventListener('click', () => showScreen('menuScreen'));
+  document.getElementById('btnLaunchGame').addEventListener('click', () => {
+    startNewGame();
+    showScreen('gameScreen');
+  });
+
+  // Dice roll click
+  document.getElementById('diceBox').addEventListener('click', () => {
+    onDiceClicked();
+  });
+
+  // Canvas click
+  document.getElementById('ludoCanvas').addEventListener('click', onCanvasClicked);
+}
+
+function updateSetupPlayerRows() {
+  document.getElementById('rowP3').style.display = state.playerCount >= 3 ? 'flex' : 'none';
+  document.getElementById('rowP4').style.display = state.playerCount >= 4 ? 'flex' : 'none';
+}
+
+function showScreen(screenId) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(screenId).classList.add('active');
+  if (screenId === 'gameScreen') {
+    requestAnimationFrame(drawBoard);
+  }
+}
+
+function updateText() {
+  const t = STRINGS[currentLang];
+  document.getElementById('appTitle').innerText = t.appTitle;
+  document.getElementById('menuHeading').innerText = t.menuHeading;
+  document.getElementById('menuSubheading').innerText = t.menuSubheading;
+  document.getElementById('txtVsBot').innerText = t.vsBot;
+  document.getElementById('txtPassPlay').innerText = t.passPlay;
+  document.getElementById('lblPlayerCount').innerText = t.playerCount;
+  document.getElementById('lblGameMode').innerText = t.gameMode;
+  document.getElementById('lblPlayerNames').innerText = t.playerNames;
+  document.getElementById('chip2P').innerText = t.twoP;
+  document.getElementById('chip3P').innerText = t.threeP;
+  document.getElementById('chip4P').innerText = t.fourP;
+  document.getElementById('chipClassic').innerText = t.classic;
+  document.getElementById('chipQuick').innerText = t.quick;
+  document.getElementById('txtStartGame').innerText = t.startGame;
+  document.getElementById('rulesTitle').innerText = t.rulesTitle;
+  document.getElementById('rule1').innerText = t.rule1;
+  document.getElementById('rule2').innerText = t.rule2;
+  document.getElementById('rule3').innerText = t.rule3;
+  document.getElementById('rule4').innerText = t.rule4;
+  document.getElementById('rule5').innerText = t.rule5;
+  document.getElementById('btnCloseRules').innerText = t.gotIt;
+}
+
+// --- Start Game ---
+function startNewGame() {
+  const colorKeys = state.playerCount === 2 
+    ? ['red', 'yellow']
+    : (state.playerCount === 3 ? ['red', 'green', 'yellow'] : ['red', 'green', 'yellow', 'blue']);
+
+  state.players = colorKeys.map((key, i) => {
+    const isBot = state.mode === 'VS_BOT' && i > 0;
+    const inputVal = document.getElementById(`nameP${i+1}`)?.value;
+    const defaultName = isBot 
+      ? (currentLang === 'bn' ? `রোবট ${COLORS[key].name}` : `Bot ${COLORS[key].enName}`)
+      : (inputVal || (currentLang === 'bn' ? `খেলোয়াড় ${i+1}` : `Player ${i+1}`));
+
+    return {
+      id: i,
+      colorKey: key,
+      color: COLORS[key],
+      name: defaultName,
+      isBot: isBot,
+      pawns: [0, 1, 2, 3].map(pid => ({
+        id: pid,
+        colorKey: key,
+        state: 'yard', // 'yard', 'track', 'homeStretch', 'finished'
+        step: 0 // on track: 0..50, in home stretch: 1..5, finished: 6
+      })),
+      finishedCount: 0,
+      totalCaptures: 0,
+      totalSixes: 0
+    };
+  });
+
+  state.turnIndex = 0;
+  state.diceValue = 1;
+  state.isRolling = false;
+  state.hasRolled = false;
+  state.consecutiveSixes = 0;
+  state.movablePawnIds.clear();
+  state.isGameOver = false;
+
+  renderPlayersBar();
+  renderDice(1);
+  updateStatus();
+  drawBoard();
+
+  checkBotTurn();
+}
+
+// --- Players Bar ---
+function renderPlayersBar() {
+  const bar = document.getElementById('playersBar');
+  bar.innerHTML = '';
+  state.players.forEach((p, idx) => {
+    const isActive = idx === state.turnIndex;
+    const badge = document.createElement('div');
+    badge.className = `player-badge ${isActive ? 'active-turn' : ''}`;
+    badge.style.borderColor = isActive ? p.color.primary : 'transparent';
+    badge.innerHTML = `
+      <div style="width:14px;height:14px;border-radius:50%;background:${p.color.primary};margin-bottom:3px;"></div>
+      <div class="name" style="color:${p.color.primary};">${p.name}</div>
+      <div class="score">🏠 ${p.finishedCount}/${state.targetPawns}</div>
+    `;
+    bar.appendChild(badge);
+  });
+}
+
+function updateStatus(customMsg) {
+  const banner = document.getElementById('statusBanner');
+  const turnName = document.getElementById('turnPlayerName');
+  const turnSub = document.getElementById('turnSubtext');
+  const diceBox = document.getElementById('diceBox');
+
+  const curr = state.players[state.turnIndex];
+  if (!curr) return;
+
+  const t = STRINGS[currentLang];
+  const pName = curr.name;
+
+  turnName.innerText = `${pName} ${t.turn}`;
+  turnName.style.color = curr.color.primary;
+
+  if (state.isRolling) {
+    turnSub.innerText = t.rolling;
+    diceBox.className = 'dice-box rolling';
+  } else if (!state.hasRolled) {
+    turnSub.innerText = curr.isBot ? `${pName} ${t.thinking}` : t.rollPrompt;
+    diceBox.className = curr.isBot ? 'dice-box' : 'dice-box can-roll';
+  } else {
+    turnSub.innerText = state.movablePawnIds.size > 0 ? t.tapToken : t.noMoves;
+    diceBox.className = 'dice-box';
+  }
+
+  if (customMsg) {
+    banner.innerText = customMsg;
+  } else if (!state.hasRolled) {
+    banner.innerText = `${pName} ${t.turn}`;
+  }
+}
+
+// --- Render 3D Pip Dice ---
+function renderDice(val) {
+  const box = document.getElementById('diceBox');
+  box.innerHTML = '';
+  const pipsPattern = {
+    1: [[2, 2]],
+    2: [[1, 1], [3, 3]],
+    3: [[1, 1], [2, 2], [3, 3]],
+    4: [[1, 1], [1, 3], [3, 1], [3, 3]],
+    5: [[1, 1], [1, 3], [2, 2], [3, 1], [3, 3]],
+    6: [[1, 1], [2, 1], [3, 1], [1, 3], [2, 3], [3, 3]]
+  };
+  const activePattern = pipsPattern[val] || pipsPattern[1];
+  for (let r = 1; r <= 3; r++) {
+    for (let c = 1; c <= 3; c++) {
+      const isPip = activePattern.some(([pr, pc]) => pr === r && pc === c);
+      const pip = document.createElement('div');
+      if (isPip) {
+        pip.className = 'pip';
+        if (val === 6) pip.style.background = '#e11d48';
+      }
+      box.appendChild(pip);
+    }
+  }
+}
+
+// --- Dice Roll Logic ---
+function onDiceClicked() {
+  if (state.isRolling || state.hasRolled || state.isGameOver) return;
+  const curr = state.players[state.turnIndex];
+  if (curr.isBot) return;
+
+  executeDiceRoll();
+}
+
+function executeDiceRoll() {
+  state.isRolling = true;
+  updateStatus();
+
+  let rolls = 0;
+  const interval = setInterval(() => {
+    const tempVal = Math.floor(Math.random() * 6) + 1;
+    renderDice(tempVal);
+    sounds.playRoll();
+    rolls++;
+    if (rolls >= 8) {
+      clearInterval(interval);
+      finalizeDiceRoll();
+    }
+  }, 65);
+}
+
+function finalizeDiceRoll() {
+  const finalVal = Math.floor(Math.random() * 6) + 1;
+  state.diceValue = finalVal;
+  state.isRolling = false;
+  state.hasRolled = true;
+  renderDice(finalVal);
+
+  const curr = state.players[state.turnIndex];
+  if (finalVal === 6) {
+    state.consecutiveSixes++;
+    curr.totalSixes++;
+  } else {
+    state.consecutiveSixes = 0;
+  }
+
+  // 3 Consecutive Sixes Rule
+  const t = STRINGS[currentLang];
+  if (state.consecutiveSixes >= 3) {
+    updateStatus(t.threeSixes);
+    state.consecutiveSixes = 0;
+    setTimeout(() => passTurn(), 1200);
+    return;
+  }
+
+  // Compute Legal Moves
+  state.movablePawnIds = computeLegalMoves(curr, finalVal);
+
+  if (state.movablePawnIds.size === 0) {
+    updateStatus(t.noMoves);
+    setTimeout(() => passTurn(), 1000);
+  } else {
+    updateStatus(finalVal === 6 ? t.rolledSix : t.tapToken);
+    drawBoard();
+
+    if (curr.isBot) {
+      setTimeout(() => botMove(curr, finalVal, state.movablePawnIds), 650);
+    }
+  }
+}
+
+function computeLegalMoves(player, dice) {
+  const validIds = new Set();
+  player.pawns.forEach(pawn => {
+    if (pawn.state === 'yard') {
+      if (dice === 6) validIds.add(pawn.id);
+    } else if (pawn.state === 'track') {
+      const newStep = pawn.step + dice;
+      if (newStep <= 50) {
+        validIds.add(pawn.id);
+      } else {
+        const homeStep = newStep - 50;
+        if (homeStep <= 6) validIds.add(pawn.id);
+      }
+    } else if (pawn.state === 'homeStretch') {
+      const newStep = pawn.step + dice;
+      if (newStep <= 6) validIds.add(pawn.id);
+    }
+  });
+  return validIds;
+}
+
+// --- Pawn Movement & Capture Logic ---
+function movePawn(player, pawnId, dice) {
+  const pawn = player.pawns.find(p => p.id === pawnId);
+  if (!pawn) return;
+
+  state.movablePawnIds.clear();
+  sounds.playStep();
+
+  let grantBonus = (dice === 6);
+  let captured = false;
+  let reachedHome = false;
+
+  if (pawn.state === 'yard') {
+    pawn.state = 'track';
+    pawn.step = 0;
+  } else if (pawn.state === 'track') {
+    const newStep = pawn.step + dice;
+    if (newStep <= 50) {
+      pawn.step = newStep;
+    } else {
+      const homeStep = newStep - 50;
+      if (homeStep === 6) {
+        pawn.state = 'finished';
+        pawn.step = 6;
+        reachedHome = true;
+      } else {
+        pawn.state = 'homeStretch';
+        pawn.step = homeStep;
+      }
+    }
+  } else if (pawn.state === 'homeStretch') {
+    const newStep = pawn.step + dice;
+    if (newStep === 6) {
+      pawn.state = 'finished';
+      pawn.step = 6;
+      reachedHome = true;
+    } else {
+      pawn.step = newStep;
+    }
+  }
+
+  // Home reached bonus & victory check
+  if (reachedHome) {
+    player.finishedCount++;
+    grantBonus = true;
+    sounds.playHome();
+    if (player.finishedCount >= state.targetPawns) {
+      handleVictory(player);
+      return;
+    }
+  }
+
+  // Check Captures on unsafe track cells
+  if (pawn.state === 'track') {
+    const landingIndex = (player.color.startTrack + pawn.step) % 52;
+    if (!SAFE_INDICES.has(landingIndex)) {
+      state.players.forEach(otherP => {
+        if (otherP.id !== player.id) {
+          otherP.pawns.forEach(op => {
+            if (op.state === 'track') {
+              const opIndex = (otherP.color.startTrack + op.step) % 52;
+              if (opIndex === landingIndex) {
+                // Knock back to yard!
+                op.state = 'yard';
+                op.step = 0;
+                captured = true;
+                player.totalCaptures++;
+                grantBonus = true;
+                sounds.playCapture();
+              }
+            }
+          });
+        }
+      });
+    }
+  }
+
+  drawBoard();
+  renderPlayersBar();
+
+  const t = STRINGS[currentLang];
+  if (captured) {
+    updateStatus(t.bonusCapture);
+  } else if (reachedHome) {
+    updateStatus(t.bonusHome);
+  }
+
+  if (grantBonus) {
+    state.hasRolled = false;
+    setTimeout(() => {
+      updateStatus();
+      checkBotTurn();
+    }, 450);
+  } else {
+    setTimeout(() => passTurn(), 350);
+  }
+}
+
+function passTurn() {
+  state.turnIndex = (state.turnIndex + 1) % state.players.length;
+  state.hasRolled = false;
+  state.consecutiveSixes = 0;
+  state.movablePawnIds.clear();
+
+  renderPlayersBar();
+  updateStatus();
+  drawBoard();
+
+  checkBotTurn();
+}
+
+function checkBotTurn() {
+  const curr = state.players[state.turnIndex];
+  if (curr && curr.isBot && !state.isGameOver) {
+    setTimeout(() => executeDiceRoll(), 650);
+  }
+}
+
+// --- Smart Bot AI ---
+function botMove(botPlayer, dice, legalIds) {
+  let bestPawnId = null;
+  let bestScore = -9999;
+
+  legalIds.forEach(pid => {
+    const pawn = botPlayer.pawns.find(p => p.id === pid);
+    let score = 0;
+
+    if (pawn.state === 'yard' && dice === 6) {
+      score += 800; // Exit yard is crucial
+    } else if (pawn.state === 'track') {
+      const newStep = pawn.step + dice;
+      if (newStep > 50 && newStep - 50 === 6) {
+        score += 2000; // Finish is best
+      } else if (newStep <= 50) {
+        const landingIdx = (botPlayer.color.startTrack + newStep) % 52;
+        // Capture bonus
+        if (!SAFE_INDICES.has(landingIdx)) {
+          state.players.forEach(op => {
+            if (op.id !== botPlayer.id) {
+              op.pawns.forEach(opPawn => {
+                if (opPawn.state === 'track') {
+                  const oIdx = (op.color.startTrack + opPawn.step) % 52;
+                  if (oIdx === landingIdx) score += 1500;
+                }
+              });
+            }
+          });
+        }
+        // Safe spot bonus
+        if (SAFE_INDICES.has(landingIdx)) score += 400;
+        score += newStep * 5;
+      }
+    } else if (pawn.state === 'homeStretch') {
+      if (pawn.step + dice === 6) score += 2000;
+      else score += (pawn.step + dice) * 10;
+    }
+
+    if (score > bestScore) {
+      bestScore = score;
+      bestPawnId = pid;
+    }
+  });
+
+  movePawn(botPlayer, bestPawnId !== null ? bestPawnId : Array.from(legalIds)[0], dice);
+}
+
+// --- Canvas Interaction ---
+function onCanvasClicked(e) {
+  if (!state.hasRolled || state.movablePawnIds.size === 0 || state.isGameOver) return;
+  const curr = state.players[state.turnIndex];
+  if (curr.isBot) return;
+
+  const canvas = document.getElementById('ludoCanvas');
+  const rect = canvas.getBoundingClientRect();
+  const scale = canvas.width / rect.width;
+  const clickX = (e.clientX - rect.left) * scale;
+  const clickY = (e.clientY - rect.top) * scale;
+  const cellSize = canvas.width / 15;
+
+  let clickedPawnId = null;
+
+  curr.pawns.forEach(pawn => {
+    if (state.movablePawnIds.has(pawn.id)) {
+      const coord = getPawnCoordinates(pawn);
+      if (coord) {
+        const px = (coord[1] + 0.5) * cellSize;
+        const py = (coord[0] + 0.5) * cellSize;
+        const dist = Math.hypot(clickX - px, clickY - py);
+        if (dist <= cellSize * 1.1) {
+          clickedPawnId = pawn.id;
+        }
+      }
+    }
+  });
+
+  if (clickedPawnId !== null) {
+    movePawn(curr, clickedPawnId, state.diceValue);
+  }
+}
+
+function getPawnCoordinates(pawn) {
+  if (pawn.state === 'yard') {
+    return YARD_SLOTS[pawn.colorKey][pawn.id];
+  } else if (pawn.state === 'track') {
+    const idx = (COLORS[pawn.colorKey].startTrack + pawn.step) % 52;
+    return TRACK_COORDS[idx];
+  } else if (pawn.state === 'homeStretch') {
+    return HOME_STRETCHES[pawn.colorKey][pawn.step - 1];
+  } else if (pawn.state === 'finished') {
+    return CENTER_HOME[pawn.colorKey];
+  }
+  return null;
+}
+
+// --- Board Drawing Engine ---
+function drawBoard() {
+  const canvas = document.getElementById('ludoCanvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const size = canvas.width;
+  const cell = size / 15;
+
+  ctx.clearRect(0, 0, size, size);
+
+  // Background
+  ctx.fillStyle = '#faf8f5';
+  ctx.fillRect(0, 0, size, size);
+
+  // Track lanes background
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(6 * cell, 0, 3 * cell, 15 * cell);
+  ctx.fillRect(0, 6 * cell, 15 * cell, 3 * cell);
+
+  // Home Stretches
+  HOME_STRETCHES.red.forEach(([r, c]) => drawColoredCell(ctx, r, c, cell, COLORS.red.primary));
+  HOME_STRETCHES.green.forEach(([r, c]) => drawColoredCell(ctx, r, c, cell, COLORS.green.primary));
+  HOME_STRETCHES.yellow.forEach(([r, c]) => drawColoredCell(ctx, r, c, cell, COLORS.yellow.primary));
+  HOME_STRETCHES.blue.forEach(([r, c]) => drawColoredCell(ctx, r, c, cell, COLORS.blue.primary));
+
+  // Colored Starts
+  drawColoredCell(ctx, 6, 1, cell, COLORS.red.primary);
+  drawColoredCell(ctx, 1, 8, cell, COLORS.green.primary);
+  drawColoredCell(ctx, 8, 13, cell, COLORS.yellow.primary);
+  drawColoredCell(ctx, 13, 6, cell, COLORS.blue.primary);
+
+  // Grid Borders
+  ctx.strokeStyle = '#e2e8f0';
+  ctx.lineWidth = 1.2;
+  for (let r = 0; r < 15; r++) {
+    for (let c = 0; c < 15; c++) {
+      const isYard = (r < 6 && c < 6) || (r < 6 && c > 8) || (r > 8 && c < 6) || (r > 8 && c > 8);
+      const isCenter = (r >= 6 && r <= 8 && c >= 6 && c <= 8);
+      if (!isYard && !isCenter) {
+        ctx.strokeRect(c * cell, r * cell, cell, cell);
+      }
+    }
+  }
+
+  // Draw 4 Yards
+  drawYard(ctx, 0, 0, 6 * cell, COLORS.red);
+  drawYard(ctx, 9 * cell, 0, 6 * cell, COLORS.green);
+  drawYard(ctx, 9 * cell, 9 * cell, 6 * cell, COLORS.yellow);
+  drawYard(ctx, 0, 9 * cell, 6 * cell, COLORS.blue);
+
+  // Center Home Triangles
+  drawCenterTriangles(ctx, cell);
+
+  // Draw Safe Stars
+  SAFE_INDICES.forEach(trackIdx => {
+    const [r, c] = TRACK_COORDS[trackIdx];
+    drawStar(ctx, (c + 0.5) * cell, (r + 0.5) * cell, cell * 0.35, '#d97706');
+  });
+
+  // Draw Pawns
+  drawPawns(ctx, cell);
+}
+
+function drawColoredCell(ctx, r, c, cell, color) {
+  ctx.fillStyle = color;
+  ctx.fillRect(c * cell, r * cell, cell, cell);
+}
+
+function drawYard(ctx, x, y, size, colorObj) {
+  const cell = size / 6;
+  ctx.fillStyle = colorObj.primary;
+  ctx.beginPath();
+  ctx.roundRect(x, y, size, size, 14);
+  ctx.fill();
+
+  const margin = 0.85 * cell;
+  const innerSize = size - 2 * margin;
+  ctx.fillStyle = '#ffffff';
+  ctx.beginPath();
+  ctx.roundRect(x + margin, y + margin, innerSize, innerSize, 16);
+  ctx.fill();
+
+  // 4 Slot circles
+  const slots = YARD_SLOTS[colorObj.name === 'লাল' ? 'red' : (colorObj.name === 'সবুজ' ? 'green' : (colorObj.name === 'হলুদ' ? 'yellow' : 'blue'))];
+  slots.forEach(([r, c]) => {
+    const cx = (c + 0.5) * cell;
+    const cy = (r + 0.5) * cell;
+    ctx.fillStyle = colorObj.primary;
+    ctx.beginPath();
+    ctx.arc(cx, cy, cell * 0.38, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = colorObj.light;
+    ctx.beginPath();
+    ctx.arc(cx, cy, cell * 0.28, 0, Math.PI * 2);
+    ctx.fill();
+  });
+}
+
+function drawCenterTriangles(ctx, cell) {
+  const x1 = 6 * cell, y1 = 6 * cell;
+  const x2 = 9 * cell, y2 = 9 * cell;
+  const mx = 7.5 * cell, my = 7.5 * cell;
+
+  // Red (Left)
+  ctx.fillStyle = COLORS.red.primary;
+  ctx.beginPath();
+  ctx.moveTo(x1, y1); ctx.lineTo(mx, my); ctx.lineTo(x1, y2); ctx.closePath(); ctx.fill();
+
+  // Green (Top)
+  ctx.fillStyle = COLORS.green.primary;
+  ctx.beginPath();
+  ctx.moveTo(x1, y1); ctx.lineTo(x2, y1); ctx.lineTo(mx, my); ctx.closePath(); ctx.fill();
+
+  // Yellow (Right)
+  ctx.fillStyle = COLORS.yellow.primary;
+  ctx.beginPath();
+  ctx.moveTo(x2, y1); ctx.lineTo(x2, y2); ctx.lineTo(mx, my); ctx.closePath(); ctx.fill();
+
+  // Blue (Bottom)
+  ctx.fillStyle = COLORS.blue.primary;
+  ctx.beginPath();
+  ctx.moveTo(x1, y2); ctx.lineTo(x2, y2); ctx.lineTo(mx, my); ctx.closePath(); ctx.fill();
+
+  // Center trophy ring
+  ctx.fillStyle = '#ffffff';
+  ctx.beginPath();
+  ctx.arc(mx, my, cell * 0.65, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.strokeStyle = '#fbbf24';
+  ctx.lineWidth = 3.5;
+  ctx.stroke();
+
+  drawStar(ctx, mx, my, cell * 0.4, '#d97706');
+}
+
+function drawStar(ctx, cx, cy, r, color) {
+  ctx.save();
+  ctx.fillStyle = color;
+  ctx.beginPath();
+  const pts = 5;
+  for (let i = 0; i < pts * 2; i++) {
+    const radius = i % 2 === 0 ? r : r * 0.48;
+    const a = (i * Math.PI / pts) - (Math.PI / 2);
+    const x = cx + radius * Math.cos(a);
+    const y = cy + radius * Math.sin(a);
+    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+  }
+  ctx.closePath();
+  ctx.fill();
+  ctx.restore();
+}
+
+function drawPawns(ctx, cell) {
+  // Collect all pawns with their board coords
+  const trackCluster = {};
+
+  state.players.forEach(p => {
+    p.pawns.forEach(pawn => {
+      const coord = getPawnCoordinates(pawn);
+      if (!coord) return;
+      const key = `${coord[0]}_${coord[1]}`;
+      if (!trackCluster[key]) trackCluster[key] = [];
+      trackCluster[key].push({ player: p, pawn: pawn, coord: coord });
+    });
+  });
+
+  const activeP = state.players[state.turnIndex];
+
+  Object.values(trackCluster).forEach(list => {
+    const [r, c] = list[0].coord;
+    const cx = (c + 0.5) * cell;
+    const cy = (r + 0.5) * cell;
+
+    if (list.length === 1) {
+      const { player, pawn } = list[0];
+      const isMovable = activeP && activeP.id === player.id && state.hasRolled && state.movablePawnIds.has(pawn.id);
+      drawSinglePawn(ctx, cx, cy, cell * 0.36, player.color, isMovable);
+    } else {
+      const offsetRadius = cell * 0.22;
+      list.forEach((item, idx) => {
+        const angle = (2 * Math.PI / list.length) * idx;
+        const px = cx + offsetRadius * Math.cos(angle);
+        const py = cy + offsetRadius * Math.sin(angle);
+        const isMovable = activeP && activeP.id === item.player.id && state.hasRolled && state.movablePawnIds.has(item.pawn.id);
+        drawSinglePawn(ctx, px, py, cell * 0.3, item.player.color, isMovable);
+      });
+    }
+  });
+}
+
+function drawSinglePawn(ctx, cx, cy, radius, colorObj, isMovable) {
+  ctx.save();
+
+  // Movable pulsing aura
+  if (isMovable) {
+    const pulseR = radius * (1.35 + 0.15 * Math.sin(state.animPulse));
+    ctx.fillStyle = 'rgba(251, 191, 36, 0.4)';
+    ctx.beginPath();
+    ctx.arc(cx, cy, pulseR, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.strokeStyle = '#fbbf24';
+    ctx.lineWidth = 2.5;
+    ctx.beginPath();
+    ctx.arc(cx, cy, pulseR * 0.9, 0, Math.PI * 2);
+    ctx.stroke();
+  }
+
+  // Pawn Drop Shadow
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.35)';
+  ctx.beginPath();
+  ctx.arc(cx, cy + radius * 0.2, radius * 0.9, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Pawn Base Rim
+  ctx.fillStyle = colorObj.dark;
+  ctx.beginPath();
+  ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Pawn Glossy Body Gradient
+  const grad = ctx.createRadialGradient(cx - radius * 0.3, cy - radius * 0.3, radius * 0.1, cx, cy, radius);
+  grad.addColorStop(0, colorObj.light);
+  grad.addColorStop(0.5, colorObj.primary);
+  grad.addColorStop(1, colorObj.dark);
+
+  ctx.fillStyle = grad;
+  ctx.beginPath();
+  ctx.arc(cx, cy, radius * 0.88, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Head sphere
+  const hr = radius * 0.45;
+  ctx.fillStyle = '#ffffff';
+  ctx.beginPath();
+  ctx.arc(cx, cy - radius * 0.15, hr, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.fillStyle = colorObj.primary;
+  ctx.beginPath();
+  ctx.arc(cx, cy - radius * 0.15, hr * 0.8, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Specular shine
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
+  ctx.beginPath();
+  ctx.arc(cx - hr * 0.3, cy - radius * 0.25, hr * 0.3, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.restore();
+}
+
+function startPulseLoop() {
+  function loop() {
+    state.animPulse += 0.08;
+    if (state.hasRolled && state.movablePawnIds.size > 0) {
+      drawBoard();
+    }
+    requestAnimationFrame(loop);
+  }
+  requestAnimationFrame(loop);
+}
+
+// --- Victory & Confetti Celebration ---
+function handleVictory(winner) {
+  state.isGameOver = true;
+  sounds.playVictory();
+
+  const t = STRINGS[currentLang];
+  document.getElementById('winnerTitle').innerText = t.winnerCongrat;
+  document.getElementById('winnerDesc').innerText = t.winnerDesc.replace('{name}', winner.name);
+  document.getElementById('winnerModal').classList.add('active');
+
+  startConfetti();
+}
+
+function startConfetti() {
+  const canvas = document.getElementById('confettiCanvas');
+  const ctx = canvas.getContext('2d');
+  const particles = [];
+  const colors = ['#e11d48', '#059669', '#d97706', '#2563eb', '#fbbf24'];
+
+  for (let i = 0; i < 50; i++) {
+    particles.push({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height - canvas.height,
+      r: Math.random() * 6 + 3,
+      color: colors[Math.floor(Math.random() * colors.length)],
+      speed: Math.random() * 3 + 2,
+      wiggle: Math.random() * 2
+    });
+  }
+
+  function frame() {
+    if (!document.getElementById('winnerModal').classList.contains('active')) return;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    particles.forEach(p => {
+      p.y += p.speed;
+      p.x += Math.sin(p.y * 0.05) * p.wiggle;
+      if (p.y > canvas.height) p.y = -10;
+      ctx.fillStyle = p.color;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fill();
+    });
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+}
+</script>
+</body>
+</html>
